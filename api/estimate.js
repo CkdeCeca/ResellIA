@@ -3,7 +3,7 @@
 // Variables necesarias en Vercel:
 // GEMINI_API_KEY
 
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_MODEL = "gemini-3.6-flash";
 
 const SYSTEM_PROMPT = `
 Eres un experto tasador de artículos de segunda mano en España.
