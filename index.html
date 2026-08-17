@@ -51,6 +51,95 @@
     width:2px; height:34px; margin:0 auto;
     background: linear-gradient(to bottom, transparent, var(--amber-dim));
     position:relative;
+
+    .upload-buttons{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:22px auto 16px;
+  max-width:500px;
+}
+
+.upload-btn{
+  flex:1;
+  min-height:64px;
+  padding:12px 16px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+
+  border:1px solid var(--line);
+  border-radius:8px;
+
+  background:var(--panel-2);
+  color:var(--chalk);
+
+  font-family:'Archivo', sans-serif;
+  cursor:pointer;
+
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    transform .2s ease;
+}
+
+.upload-btn:hover{
+  border-color:var(--amber);
+  background:#252016;
+  transform:translateY(-2px);
+}
+
+.upload-btn-icon{
+  width:34px;
+  height:34px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:1px solid var(--amber-dim);
+  border-radius:50%;
+
+  color:var(--amber);
+  font-size:18px;
+}
+
+.upload-btn strong{
+  display:block;
+  text-align:left;
+  font-size:13px;
+}
+
+.upload-btn small{
+  display:block;
+  margin-top:3px;
+
+  text-align:left;
+
+  font-family:'Space Mono', monospace;
+  font-size:8px;
+  color:var(--chalk-dim);
+}
+
+.camera-btn{
+  border-color:rgba(242,169,59,.25);
+}
+
+.dz-sub{
+  margin-top:14px;
+}
+
+@media(max-width:600px){
+  .upload-buttons{
+    flex-direction:column;
+  }
+
+  .upload-btn{
+    width:100%;
+  }
+}
   }
   .lamp::after{
     content:"";
@@ -440,11 +529,39 @@
 
   <main>
     <div id="dropzone" class="dropzone">
-      <input type="file" id="fileInput" accept="image/*">
-      <div class="dz-icon">↑</div>
-      <div class="dz-title">Sube o arrastra una foto</div>
-      <div class="dz-sub">JPG · PNG · WEBP — a poder ser con buena luz y sin filtros</div>
-    </div>
+
+  <input type="file" id="fileInput" accept="image/*">
+  <input type="file" id="cameraInput" accept="image/*" capture="environment">
+
+  <div class="dz-icon">↑</div>
+
+  <div class="dz-title">Añade una foto del artículo</div>
+
+  <div class="upload-buttons">
+
+    <button type="button" class="upload-btn" id="uploadBtn">
+      <span class="upload-btn-icon">↑</span>
+      <span>
+        <strong>Subir foto</strong>
+        <small>JPG · PNG · WEBP</small>
+      </span>
+    </button>
+
+    <button type="button" class="upload-btn camera-btn" id="cameraBtn">
+      <span class="upload-btn-icon">⌾</span>
+      <span>
+        <strong>Tomar foto</strong>
+        <small>Usar cámara</small>
+      </span>
+    </button>
+
+  </div>
+
+  <div class="dz-sub">
+    A poder ser con buena luz y sin filtros
+  </div>
+
+</div>
 
     <div class="preview-area" id="previewArea">
       <div class="preview-row">
