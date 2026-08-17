@@ -47,9 +47,9 @@ export default async function handler(req, res) {
     }
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.Gemini_API_Key;
   if (!apiKey) {
-    res.status(500).json({ error: 'Falta configurar GEMINI_API_KEY en las variables de entorno del proyecto' });
+    res.status(500).json({ error: 'Falta configurar Gemini_API_Key en las variables de entorno del proyecto' });
     return;
   }
 
