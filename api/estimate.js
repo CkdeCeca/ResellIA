@@ -88,10 +88,21 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      const errText = await response.text();
-      res.status(response.status).json({ error: 'Error al llamar a la API de Gemini', detail: errText });
-      return;
-    }
+  const errText = await response.text();
+
+  console.error('GEMINI ERROR:', {
+    status: response.status,
+    body: errText
+  });
+
+  res.status(500).json({
+    error: 'Gemini ha rechazado la petición',
+    gemini_status: response.status,
+    gemini_response: errText
+  });
+
+  return;
+}
 
     const data = await response.json();
 
