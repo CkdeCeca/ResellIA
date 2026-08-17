@@ -2,7 +2,7 @@
 // Función Serverless para Vercel
 // Gemini 2.5 Flash + visión + Google Search
 //
-// IMPORTANTE:
+// IMPORTANTE
 // - La API key NO se escribe aquí.
 // - Debe estar en Vercel > Settings > Environment Variables
 // - Nombre de la variable: GEMINI_API_KEY
