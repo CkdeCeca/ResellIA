@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Sube una foto de un artículo y estima su precio de reventa en Vinted y Wallapop.">
+<title>Tasador de Segunda Mano</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0c0a08">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tasador">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #0c0a08;
+    --panel: #17140f;
+    --panel-2: #1e1a13;
+    --chalk: #f2ecdc;
+    --chalk-dim: #a89d86;
+    --amber: #f2a93b;
+    --amber-dim: #8a6a26;
+    --olive: #7fae6f;
+    --stamp: #d9695a;
+    --line: rgba(242,236,220,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% -5%, rgba(242,169,59,0.16), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 85% 110%, rgba(127,174,111,0.06), transparent 60%),
+      var(--ink);
+    background-attachment: fixed;
+    color:var(--chalk);
+    font-family:'Archivo', sans-serif;
+    min-height:100vh;
+    padding: 32px 16px 80px;
+  }
+  .noise{
+    position:fixed; inset:0; pointer-events:none; opacity:0.045; z-index:0; mix-blend-mode:overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{ position:relative; z-index:1; max-width:920px; margin:0 auto; }
+
+  header{ text-align:center; margin-bottom:36px; }
+  .lamp{
+    width:2px; height:34px; margin:0 auto;
+    background: linear-gradient(to bottom, transparent, var(--amber-dim));
+    position:relative;
+  }
+  .lamp::after{
+    content:"";
+    position:absolute; bottom:-3px; left:50%; transform:translateX(-50%);
+    width:8px; height:8px; border-radius:50%;
+    background: var(--amber);
+    box-shadow: 0 0 18px 6px rgba(242,169,59,0.55);
+  }
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--chalk-dim);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin:14px 0 10px;
+  }
+  .eyebrow::before, .eyebrow::after{ content:""; width:22px; height:1px; background:var(--chalk-dim); opacity:0.4; }
+  h1{
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(32px, 6vw, 54px);
+    line-height:0.98;
+    margin:0 0 12px;
+    letter-spacing:-0.01em;
+    color:var(--chalk);
+  }
+  h1 span{ color:var(--amber); }
+  .sub{
+    font-size:15px;
+    color:var(--chalk-dim);
+    max-width:520px;
+    margin:0 auto;
+    line-height:1.5;
+  }
+
+  .notice{
+    font-family:'Space Mono', monospace;
+    font-size:12.5px;
+    line-height:1.6;
+    background: var(--panel);
+    border: 1px dashed var(--line);
+    color: var(--chalk-dim);
+    padding: 12px 16px;
+    border-radius: 4px;
+    max-width: 640px;
+    margin: 18px auto 0;
+    text-align:left;
+  }
+  .notice b{ color:var(--amber); }
+
+  main{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 36px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 24px 60px -24px rgba(0,0,0,0.7);
+    position:relative;
+  }
+  main::before{
+    content:"";
+    position:absolute; top:14px; left:14px; right:14px; bottom:14px;
+    border:1px solid rgba(242,236,220,0.06);
+    pointer-events:none;
+    border-radius:3px;
+  }
+
+  .dropzone{
+    border: 2px dashed var(--line);
+    border-radius: 6px;
+    padding: 40px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition: border-color .15s ease, background .15s ease;
+    position:relative;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color: var(--amber);
+    background: rgba(242,169,59,0.05);
+  }
+  .dropzone input{ display:none; }
+  .dz-icon{
+    width:46px; height:46px; margin:0 auto 14px;
+    border:1.5px solid var(--chalk); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--chalk);
+  }
+  .dz-title{ font-weight:700; font-size:16px; margin-bottom:4px; color:var(--chalk); }
+  .dz-sub{ font-size:13px; color:var(--chalk-dim); font-family:'Space Mono', monospace; }
+
+  .preview-area{ display:none; }
+  .preview-area.show{ display:block; }
+
+  .preview-row{
+    display:flex;
+    gap:28px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  .photo-frame{
+    position:relative;
+    width:220px;
+    flex-shrink:0;
+  }
+  .photo-frame img{
+    width:100%;
+    display:block;
+    border-radius:3px;
+    box-shadow: 0 14px 34px -14px rgba(0,0,0,0.8);
+    border: 6px solid var(--panel-2);
+    filter: saturate(0.92) contrast(1.03);
+  }
+  .tag{
+    position:absolute;
+    top:-14px; right:-20px;
+    width:60px; height:60px;
+    background: var(--amber);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    transform: rotate(-8deg);
+    box-shadow: 0 6px 16px -6px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.2);
+    font-family:'Caveat', cursive;
+    font-size:15px;
+    font-weight:700;
+    text-align:center;
+    color:var(--ink);
+    line-height:1.1;
+  }
+
+  .col-right{ flex:1; min-width:240px; }
+  .field-label{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--chalk-dim);
+    margin-bottom:6px;
+    display:block;
+  }
+  textarea{
+    width:100%;
+    min-height:64px;
+    resize:vertical;
+    font-family:'Archivo', sans-serif;
+    font-size:14px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background: var(--panel-2);
+    color:var(--chalk);
+    margin-bottom:16px;
+  }
+  textarea::placeholder{ color: rgba(242,236,220,0.35); }
+  textarea:focus{ outline:2px solid var(--amber); outline-offset:1px; }
+
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  button{
+    font-family:'Archivo', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    border:none;
+    border-radius:4px;
+    padding:12px 20px;
+    cursor:pointer;
+    transition: transform .1s ease, opacity .15s ease, background .15s ease;
+  }
+  button:active{ transform: scale(0.97); }
+  .btn-primary{
+    background: var(--amber);
+    color: var(--ink);
+  }
+  .btn-primary:hover{ background:#ffbe5c; }
+  .btn-primary:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn-ghost{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--chalk);
+  }
+  .btn-ghost:hover{ background: rgba(242,236,220,0.06); }
+
+  .status{
+    margin-top:16px;
+    font-family:'Space Mono', monospace;
+    font-size:12.5px;
+    color:var(--chalk-dim);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .status.error{ color: var(--stamp); }
+  .dot{
+    width:6px; height:6px; border-radius:50%; background:var(--amber);
+    animation: pulse 1s infinite ease-in-out;
+    box-shadow: 0 0 8px 1px rgba(242,169,59,0.6);
+  }
+  @keyframes pulse{ 0%,100%{opacity:0.3;} 50%{opacity:1;} }
+
+  .results{
+    display:none;
+    margin-top:32px;
+    padding-top:28px;
+    border-top:1px dashed var(--line);
+  }
+  .results.show{ display:block; }
+
+  .item-id{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    color:var(--chalk-dim);
+    margin-bottom:4px;
+    letter-spacing:0.05em;
+  }
+  .item-name{
+    font-family:'Archivo Black', sans-serif;
+    font-size:22px;
+    margin:0 0 4px;
+    color:var(--chalk);
+  }
+  .item-desc{
+    font-size:13.5px;
+    color:var(--chalk-dim);
+    max-width:560px;
+    margin:0 0 22px;
+    line-height:1.5;
+  }
+
+  .cards{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width:520px){ .cards{ grid-template-columns:1fr; } }
+
+  .price-card{
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .price-card::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0; width:3px;
+  }
+  .price-card.vinted::before{ background: var(--olive); }
+  .price-card.wallapop::before{ background: var(--stamp); }
+
+  .platform-name{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color: var(--chalk-dim);
+  }
+  .platform-name .dotcolor{ width:8px; height:8px; border-radius:50%; }
+  .vinted .dotcolor{ background:var(--olive); box-shadow:0 0 6px 1px rgba(127,174,111,0.5); }
+  .wallapop .dotcolor{ background:var(--stamp); box-shadow:0 0 6px 1px rgba(217,105,90,0.5); }
+
+  .price-value{
+    font-family:'Archivo Black', sans-serif;
+    font-size:30px;
+    margin-bottom:4px;
+    color:var(--chalk);
+  }
+  .price-range{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    color:var(--chalk-dim);
+  }
+
+  .avg-band{
+    background: var(--ink);
+    border: 1px solid var(--amber-dim);
+    color: var(--chalk);
+    border-radius: 5px;
+    padding: 16px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .avg-band .label{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--chalk-dim);
+  }
+  .avg-band .value{
+    font-family:'Archivo Black', sans-serif;
+    font-size:26px;
+    color: var(--amber);
+  }
+
+  .confidence{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--chalk-dim);
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .confidence .badge{
+    padding:2px 8px;
+    border-radius:3px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    font-size:10px;
+  }
+  .confidence .badge.alta{ background: rgba(127,174,111,0.18); color: var(--olive); }
+  .confidence .badge.media{ background: rgba(242,169,59,0.18); color: var(--amber); }
+  .confidence .badge.baja{ background: rgba(217,105,90,0.18); color: var(--stamp); }
+
+  .notes{
+    font-size:13px;
+    color:var(--chalk-dim);
+    line-height:1.6;
+    background: var(--ink);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:14px 16px;
+    margin-bottom:16px;
+  }
+  .notes b{ color:var(--chalk); }
+  .notes ul{ margin:8px 0 0; padding-left:18px; }
+  .notes li{ margin-bottom:4px; }
+
+  .sources{
+    font-size:12.5px;
+    color:var(--chalk-dim);
+    line-height:1.7;
+    background: var(--ink);
+    border:1px dashed var(--line);
+    border-radius:5px;
+    padding:14px 16px;
+  }
+  .sources b{ color:var(--chalk); }
+  .sources a{ color: var(--amber); text-decoration:none; word-break:break-all; }
+  .sources a:hover{ text-decoration:underline; }
+  .sources ol{ margin:8px 0 0; padding-left:18px; }
+  .sources li{ margin-bottom:4px; }
+
+  .caveat{
+    margin-top:18px;
+    font-family:'Space Mono', monospace;
+    font-size:11.5px;
+    color:var(--chalk-dim);
+    opacity:0.85;
+    line-height:1.6;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:30px;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--chalk-dim);
+    opacity:0.6;
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="wrap">
+
+  <header>
+    <div class="lamp"></div>
+    <div class="eyebrow">Tasador casero</div>
+    <h1>¿Cuánto vale<br><span>tu prenda</span> en el mercado?</h1>
+    <p class="sub">Sube una foto del artículo y te doy una estimación de precio de reventa en Vinted y Wallapop, apoyada en búsquedas reales en la web.</p>
+    <div class="notice">
+      <b>Cómo funciona ahora:</b> la IA identifica el artículo en la foto y <b>busca en internet</b> anuncios, guías de precios y referencias de reventa similares antes de calcular el rango. Esto mejora mucho la precisión frente a estimar solo de memoria — pero sigue sin ser un scraper en directo de Vinted o Wallapop, así que trátalo como una referencia sólida, no como el precio exacto de tu anuncio.
+    </div>
+  </header>
+
+  <main>
+    <div id="dropzone" class="dropzone">
+      <input type="file" id="fileInput" accept="image/*">
+      <div class="dz-icon">↑</div>
+      <div class="dz-title">Sube o arrastra una foto</div>
+      <div class="dz-sub">JPG · PNG · WEBP — a poder ser con buena luz y sin filtros</div>
+    </div>
+
+    <div class="preview-area" id="previewArea">
+      <div class="preview-row">
+        <div class="photo-frame">
+          <img id="previewImg" src="" alt="Foto del artículo">
+          <div class="tag">a<br>tasar</div>
+        </div>
+        <div class="col-right">
+          <label class="field-label" for="extraInfo">Detalles extra (opcional, ayuda mucho)</label>
+          <textarea id="extraInfo" placeholder="Ej: talla M, Zara, usado 2 veces, con etiqueta, modelo concreto..."></textarea>
+          <div class="btn-row">
+            <button class="btn-primary" id="estimateBtn">Estimar precio</button>
+            <button class="btn-ghost" id="changeBtn">Cambiar foto</button>
+          </div>
+          <div class="status" id="statusMsg" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div class="results" id="results"></div>
+    </div>
+  </main>
+
+  <footer>hecho para no malvender tus cosas</footer>
+</div>
+
+<script>
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const previewArea = document.getElementById('previewArea');
+const previewImg = document.getElementById('previewImg');
+const changeBtn = document.getElementById('changeBtn');
+const estimateBtn = document.getElementById('estimateBtn');
+const statusMsg = document.getElementById('statusMsg');
+const results = document.getElementById('results');
+const extraInfo = document.getElementById('extraInfo');
+
+let base64Data = null;
+let mediaType = null;
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+});
+changeBtn.addEventListener('click', () => {
+  fileInput.value = '';
+  base64Data = null;
+  previewArea.classList.remove('show');
+  results.classList.remove('show');
+  results.innerHTML = '';
+  dropzone.style.display = 'block';
+});
+
+function handleFile(file){
+  if (!file.type.startsWith('image/')) return;
+  mediaType = file.type;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result = reader.result;
+    base64Data = result.split(',')[1];
+    previewImg.src = result;
+    previewArea.classList.add('show');
+    dropzone.style.display = 'none';
+    results.classList.remove('show');
+    results.innerHTML = '';
+    statusMsg.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function setStatus(text, isError){
+  statusMsg.style.display = 'flex';
+  statusMsg.className = 'status' + (isError ? ' error' : '');
+  statusMsg.innerHTML = isError ? text : '<span class="dot"></span>' + text;
+}
+
+const statusMessages = [
+  'Identificando el artículo en la foto…',
+  'Buscando anuncios y precios de referencia…',
+  'Cruzando datos de Vinted y Wallapop…',
+  'Calculando el rango final…'
+];
+
+estimateBtn.addEventListener('click', async () => {
+  if (!base64Data) return;
+  estimateBtn.disabled = true;
+  results.classList.remove('show');
+
+  let statusIdx = 0;
+  setStatus(statusMessages[0], false);
+  const statusInterval = setInterval(() => {
+    statusIdx = (statusIdx + 1) % statusMessages.length;
+    setStatus(statusMessages[statusIdx], false);
+  }, 3200);
+
+  const extra = extraInfo.value.trim();
+
+  async function callApi(){
+    return fetch('/api/estimate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-app-password': localStorage.getItem('tasador_pw') || ''
+      },
+      body: JSON.stringify({
+        imageBase64: base64Data,
+        mediaType: mediaType,
+        extra: extra
+      })
+    });
+  }
+
+  try {
+    let response = await callApi();
+
+    if (response.status === 401) {
+      const pw = window.prompt('Esta web requiere un código de acceso. Introdúcelo:');
+      if (pw === null) {
+        clearInterval(statusInterval);
+        setStatus('Cancelado — necesitas el código de acceso para usar el tasador.', true);
+        estimateBtn.disabled = false;
+        return;
+      }
+      localStorage.setItem('tasador_pw', pw);
+      response = await callApi();
+    }
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error(errBody.error || ('Error de red: ' + response.status));
+    }
+
+    const parsed = await response.json();
+    renderResults(parsed);
+    clearInterval(statusInterval);
+    statusMsg.style.display = 'none';
+  } catch (err) {
+    console.error(err);
+    clearInterval(statusInterval);
+    setStatus('No he podido generar la estimación. Prueba de nuevo con otra foto o en unos segundos.', true);
+  } finally {
+    estimateBtn.disabled = false;
+  }
+});
+
+function renderResults(d){
+  const conf = (d.confidence || 'media').toLowerCase();
+  const confLabel = conf === 'alta' ? 'Confianza alta' : conf === 'baja' ? 'Confianza baja' : 'Confianza media';
+
+  const sourcesHtml = (d.sources && d.sources.length)
+    ? `<div class="sources">
+        <b>Fuentes consultadas:</b>
+        <ol>
+          ${d.sources.map(s => `<li><a href="${escapeAttr(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.title || s.url)}</a></li>`).join('')}
+        </ol>
+      </div>`
+    : `<div class="sources"><b>Fuentes consultadas:</b> no se encontraron referencias externas suficientemente específicas; la estimación se apoya sobre todo en conocimiento general de mercado.</div>`;
+
+  results.innerHTML = `
+    <div class="item-id">ARTÍCULO IDENTIFICADO</div>
+    <h2 class="item-name">${escapeHtml(d.item_name || 'Artículo')}</h2>
+    <p class="item-desc">${escapeHtml(d.item_description || '')}</p>
+
+    <div class="cards">
+      <div class="price-card vinted">
+        <div class="platform-name"><span>Vinted</span><span class="dotcolor"></span></div>
+        <div class="price-value">${d.vinted_low}–${d.vinted_high} €</div>
+        <div class="price-range">rango orientativo de venta</div>
+      </div>
+      <div class="price-card wallapop">
+        <div class="platform-name"><span>Wallapop</span><span class="dotcolor"></span></div>
+        <div class="price-value">${d.wallapop_low}–${d.wallapop_high} €</div>
+        <div class="price-range">rango orientativo de venta</div>
+      </div>
+    </div>
+
+    <div class="avg-band">
+      <span class="label">Precio medio combinado</span>
+      <span class="value">${d.average_price} €</span>
+    </div>
+
+    <div class="confidence"><span class="badge ${conf}">${confLabel}</span> según la cantidad y calidad de referencias encontradas</div>
+
+    <div class="notes">
+      <b>Para vender mejor:</b>
+      <ul>
+        ${(d.notes || []).map(n => `<li>${escapeHtml(n)}</li>`).join('')}
+      </ul>
+    </div>
+
+    ${sourcesHtml}
+
+    <div class="caveat">
+      * Estimación generada por IA a partir de la imagen y de búsquedas web en el momento de la consulta. No es una lectura directa de anuncios activos en Vinted o Wallapop — los precios reales varían según demanda, estado exacto y competencia del momento.
+    </div>
+  `;
+  results.classList.add('show');
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+function escapeAttr(str){
+  return (str || '').replace(/"/g, '&quot;');
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
