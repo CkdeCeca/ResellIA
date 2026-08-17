@@ -4,7 +4,7 @@
 // Consigue la clave gratis en https://aistudio.google.com/app/apikey
 // Opcional: define APP_PASSWORD para exigir un código de acceso antes de dejar usar la web
 
-const GEMINI_MODEL = 'gemini-2.5-flash'; // modelo estable con capa gratuita, visión y búsqueda web
+const GEMINI_MODEL = 'gemini-2.5-flash-lite'; // modelo estable con capa gratuita, visión y búsqueda web
 
 const SYSTEM_PROMPT = `Eres un tasador experto en ropa, calzado, accesorios y objetos de segunda mano en el mercado español, especializado en Vinted y Wallapop. Tienes acceso a búsqueda web: úsala de verdad, no te la saltes.
 
