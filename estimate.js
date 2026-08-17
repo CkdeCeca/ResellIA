@@ -1,6 +1,6 @@
 // Función serverless (Vercel). Se despliega automáticamente en /api/estimate
 // Usa la API gratuita de Google Gemini (visión + búsqueda web integrada).
-// Guarda tu clave en la variable de entorno GEMINI_API_KEY (Vercel > Settings > Environment Variables)
+// Guarda tu clave en la variable de entorno Gemini_API_Key (Vercel > Settings > Environment Variables)
 // Consigue la clave gratis en https://aistudio.google.com/app/apikey
 // Opcional: define APP_PASSWORD para exigir un código de acceso antes de dejar usar la web
 
