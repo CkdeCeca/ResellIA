@@ -1,7 +1,7 @@
 # Copia este archivo como .env.local para probar en local (nunca lo subas a GitHub)
 
 # Obligatoria: tu clave de la API de Google Gemini (gratis en aistudio.google.com/app/apikey)
-GEMINI_API_KEY=AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Gemini_API_Key=AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Opcional: si la defines, la web pedirá este código antes de dejar usarla.
 # Recomendable si la vas a compartir públicamente, para controlar quién la usa
