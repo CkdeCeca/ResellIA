@@ -4,6 +4,15 @@ const GEMINI_MODELS = [
   "gemini-3.6-flash"
 ];
 
+// Aumenta el límite del cuerpo de la solicitud al máximo permitido por Vercel
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '4.5mb',
+    },
+  },
+};
+
 const SYSTEM_PROMPT = `
 Eres un tasador experto en artículos de segunda mano en España.
 
